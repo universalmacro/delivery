@@ -1,0 +1,242 @@
+openapi: 3.0.3
+info:
+  title: Delivery APIs
+  description: |-
+    universalmacro
+  contact:
+    email: chenyunda218@gmail.com
+  version: 0.0.1
+servers:
+  - url: https://localhost/
+tags:
+  - name: Account
+  - name: Verification
+  - name: restaurant
+paths:
+  /me:
+    get:
+      description: 'Get current account'
+      operationId: GetAccount
+      tags:
+        - Account
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+  /accounts:
+    post:
+      description: 'Create account'
+      operationId: CreateAccount
+      tags:
+        - Account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+      responses:
+        '201':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+  /verifications/phone:
+    post:
+      description: 'Send verification code'
+      operationId: SendVerificationCode
+      tags:
+        - Verification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVerificationRequest'
+      responses:
+        '204':
+          description: 'Success'
+  /restaurants:
+    get:
+      description: 'Get restaurants'
+      operationId: GetRestaurants
+      tags:
+        - restaurant
+      parameters:
+        - in: query
+          name: index
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - $ref: '#/components/parameters/IndexParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - in: query
+          name: latitude
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: longitude
+          schema:
+            type: number
+            format: double
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestaurantList'
+components:
+  schemas:
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+        phone:
+          $ref: '#/components/schemas/PhoneNumber'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountRole'
+        createdAt:
+          type: integer
+          format: int64
+          description: 'Created time'
+          example: 1612345678901
+        updatedAt:
+          type: integer
+          format: int64
+          description: 'Updated time'
+          example: 1612345678901
+    AccountRole:
+      type: string
+      enum:
+        - 'ADMIN'
+        - 'CLIENT'
+        - 'RIDER'
+    CreateAccountRequest:
+      type: object
+      properties:
+        phone:
+          $ref: '#/components/schemas/PhoneNumber'
+        verificationCode:
+          type: string
+          description: 'Verification code'
+          example: '123456'
+        password:
+          type: string
+          description: 'Password'
+          example: '123456'
+    PhoneNumber:
+      type: object
+      properties:
+        countryCode:
+          type: string
+          description: 'Country code'
+          example: '86'
+        number:
+          type: string
+          description: 'Phone number'
+          example: '1234567890'
+    CreateVerificationRequest:
+      type: object
+      properties:
+        phone:
+          $ref: '#/components/schemas/PhoneNumber'
+    Restaurant:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        coverImage:
+          type: string
+        coordinate:
+          $ref: '#/components/schemas/Coordinate'
+        address:
+          type: string
+    RestaurantList:
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Restaurant'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    Pagination:
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int64
+          description: 'Current page index'
+          example: 0
+        limit:
+          type: integer
+          format: int64
+          description: 'Total pages'
+          example: 10
+        total:
+          type: integer
+          format: int64
+          description: 'Total items'
+          example: 100
+    Coordinate:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+          description: 'Latitude'
+          example: 0.0
+        longitude:
+          type: number
+          format: double
+          description: 'Longitude'
+          example: 0.0
+  parameters:
+    IndexParam:
+      name: index
+      in: query
+      description: 'Current page index'
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    LimitParam:
+      name: limit
+      in: query
+      description: 'Total pages'
+      schema:
+        type: integer
+        minimum: 1
+        default: 10
+    ID:
+      in: path
+      name: id
+      schema:
+        type: string
+      required: true
+    StartAt:
+      in: query
+      name: startAt
+      schema:
+        type: integer
+        format: int64
+    EndAt:
+      in: query
+      name: endAt
+      schema:
+        type: integer
+        format: int64
